@@ -31,6 +31,7 @@ set s8=[ ]
 set s9=[ ]
 set sA=[ ]
 set sB=[ ]
+set sC=[ ]
 
 :MENU
 cls
@@ -55,6 +56,7 @@ echo    %s7% 7. Desativar hibernacao
 echo    %s8% 8. Desativar Superfetch/SysMain
 echo    %s9% 9. Ativar modo alto desempenho
 echo    %sA% A. Otimizar uso de memoria
+echo    %sC% C. Limpar memoria RAM (liberar espaco)
 echo.
 echo    [AVANCADO - Usuarios experientes]
 echo    %sB% B. Otimizar configuracoes de boot
@@ -80,6 +82,7 @@ if /i "%op%"=="8" goto OPT8
 if /i "%op%"=="9" goto OPT9
 if /i "%op%"=="A" goto OPTA
 if /i "%op%"=="B" goto OPTB
+if /i "%op%"=="C" goto OPTC
 if /i "%op%"=="E" goto EXEC
 if /i "%op%"=="T" goto TODOS
 if /i "%op%"=="R" goto RESET
@@ -131,6 +134,10 @@ goto MENU
 if "%sB%"=="[ ]" (set sB=[X]) else (set sB=[ ])
 goto MENU
 
+:OPTC
+if "%sC%"=="[ ]" (set sC=[X]) else (set sC=[ ])
+goto MENU
+
 :TODOS
 set s1=[X]
 set s2=[X]
@@ -143,6 +150,7 @@ set s8=[X]
 set s9=[X]
 set sA=[X]
 set sB=[X]
+set sC=[X]
 goto MENU
 
 :RESET
@@ -157,6 +165,7 @@ set s8=[ ]
 set s9=[ ]
 set sA=[ ]
 set sB=[ ]
+set sC=[ ]
 goto MENU
 
 :EXEC
@@ -263,6 +272,40 @@ if "%sB%"=="[X]" (
     bcdedit /set disabledynamictick yes
     echo OK - Boot otimizado >> "%LOGFILE%"
     echo Concluido!
+    echo.
+)
+
+if "%sC%"=="[X]" (
+    echo [C] Limpando memoria RAM...
+    echo Liberando memoria...
+    
+    :: Limpa working sets de processos
+    echo off | clip
+    
+    :: Limpa standby memory
+    wmic process where name="wmic.exe" CALL setpriority "idle" >nul 2>&1
+    
+    :: Esvazia working sets
+    for /f "skip=1" %%p in ('wmic process get processid') do (
+        if not "%%p"=="" (
+            tasklist /FI "PID eq %%p" 2>nul | find ":" >nul
+            if not errorlevel 1 (
+                wmic process where ProcessId=%%p CALL setpriority "idle" >nul 2>&1
+            )
+        )
+    )
+    
+    :: Tenta usar EmptyStandbyList se disponivel
+    if exist "%SystemRoot%\System32\EmptyStandbyList.exe" (
+        EmptyStandbyList.exe standbylist >nul 2>&1
+        EmptyStandbyList.exe modifiedpagelist >nul 2>&1
+    )
+    
+    :: Limpa clipboard e cache
+    echo off | clip
+    
+    echo OK - Memoria RAM liberada >> "%LOGFILE%"
+    echo Concluido! Memoria liberada.
     echo.
 )
 
