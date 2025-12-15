@@ -1,5 +1,5 @@
 @echo off
-title Otimizador PC Pro v2.0
+title Ordinary Optimization v2.5
 color 0B
 mode con cols=85 lines=40
 
