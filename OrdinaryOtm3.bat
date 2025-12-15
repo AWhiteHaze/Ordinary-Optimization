@@ -38,7 +38,7 @@ cls
 color 0B
 echo.
 echo ===============================================================================
-echo    OTIMIZADOR PC PRO v2.0 - Menu Interativo
+echo    Ordinary Optimization v2.5 - Menu 
 echo ===============================================================================
 echo.
 echo    [LIMPEZA - Seguro]
